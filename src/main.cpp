@@ -18,6 +18,7 @@ int main(int ac, char **av)
     Map map;
     std::vector<Enemy *> enemies;
     sf::Clock clock;
+    sf::Clock spawnClock;
     map._screenWidth = screenWidth;
     map._screenHeight = screenHeight;
     map._tileWidth = 16;
@@ -45,6 +46,12 @@ int main(int ac, char **av)
         sf::Time deltaTime = clock.restart();
         sf::Vector2f movement(0, 0);
 
+        if (spawnClock.getElapsedTime().asSeconds() >= 1.0f)
+        {
+            enemies.push_back(new Bat(10, "bat", 10, 100.0f, "/Users/tristanus/PersonalProject/VampireSurvivorRipOff/assets/Monsters_Creatures_Fantasy/Flying eye/Flight.png", screenWidth, screenHeight));
+            spawnClock.restart();
+        }
+
         if (sf::Keyboard::isKeyPressed(player.leftKey))
         {
             movement.x -= player.speed;
@@ -68,7 +75,12 @@ int main(int ac, char **av)
 
         map.draw(window);
         player.draw(window);
-
+        for (Enemy *enemy : enemies)
+        {
+            enemy->draw(window);
+            enemy->animSprite(150, 150, 8, 0.1f);
+            enemy->move(player.sprite.getPosition());
+        }
         window.display();
     }
 

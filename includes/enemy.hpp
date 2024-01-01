@@ -8,7 +8,8 @@ public:
     Enemy(int hp, std::string name, int dmg, float speed, std::string texturePath, int screenWidth, int screenHeight);
     ~Enemy();
     void animSprite(int frameWidth, int frameHeight, int frameCount, float frameDuration);
-    void move(sf::Vector2i playerPos);
+    void move(sf::Vector2f playerPos);
+    void draw(sf::RenderWindow &Window);
     int _hp;
     std::string _name;
     int _dmg;
@@ -16,12 +17,13 @@ public:
     sf::Texture _texture;
     sf::Sprite _sprite;
     sf::Clock _animClock;
+    sf::Clock _moveClock;
 
 private:
     int _currentFrame = 0;
 };
 
-void Enemy::Enemy(int hp, std::string name, int dmg, float speed, std::string texturePath, int screenWidth, int screenHeight)
+Enemy::Enemy(int hp, std::string name, int dmg, float speed, std::string texturePath, int screenWidth, int screenHeight)
 {
     _hp = hp;
     _name = name;
@@ -38,7 +40,7 @@ void Enemy::Enemy(int hp, std::string name, int dmg, float speed, std::string te
     {
         std::cout << "error texture loading : " << texturePath << std::endl;
     }
-    _sprite.setTexture(texture);
+    _sprite.setTexture(_texture);
     if (sp == 0)
     {
         pos.x = xRdm(gen);
@@ -62,9 +64,23 @@ void Enemy::Enemy(int hp, std::string name, int dmg, float speed, std::string te
     _sprite.setPosition(pos.x, pos.y);
 }
 
-void Enemy::move(sf::Vector2i playerPos)
+void Enemy::move(sf::Vector2f playerPos)
 {
-    _sprite
+    sf::Time deltaTime = _moveClock.restart();
+
+    sf::Vector2f direction(playerPos.x - _sprite.getPosition().x, playerPos.y - _sprite.getPosition().y);
+
+    float length = std::sqrt(direction.x * direction.x + direction.y * direction.y);
+
+    if (length != 0)
+    {
+        direction.x /= length;
+        direction.y /= length;
+    }
+
+    sf::Vector2f movement = direction * _speed * deltaTime.asSeconds();
+
+    _sprite.move(movement);
 }
 
 void Enemy::animSprite(int frameWidth, int frameHeight, int frameCount, float frameDuration)
@@ -72,7 +88,12 @@ void Enemy::animSprite(int frameWidth, int frameHeight, int frameCount, float fr
     if (_animClock.getElapsedTime().asSeconds() > frameDuration)
     {
         _currentFrame = (_currentFrame + 1) % frameCount;
-        sprite.setTextureRect(sf::IntRect(frameWidth * _currentFrame, 0, frameWidth, frameHeight));
+        _sprite.setTextureRect(sf::IntRect(frameWidth * _currentFrame, 0, frameWidth, frameHeight));
         _animClock.restart();
     }
+}
+
+void Enemy::draw(sf::RenderWindow &window)
+{
+    window.draw(_sprite);
 }

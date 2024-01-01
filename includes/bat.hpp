@@ -2,9 +2,7 @@
 
 class Bat : public Enemy
 {
-private:
-    /* data */
 public:
-    Bat(int hp, std::string name, int dmg, float speed, std::string texturePath, int screenWidth, int screenHeight) {}
-    ~Bat();
+    Bat(int hp, std::string name, int dmg, float speed, std::string texturePath, int screenWidth, int screenHeight)
+        : Enemy(hp, name, dmg, speed, texturePath, screenWidth, screenHeight) {}
 };
